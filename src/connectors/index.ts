@@ -5,6 +5,7 @@ import { WalletLinkConnector } from '@web3-react/walletlink-connector'
 import { PortisConnector } from '@web3-react/portis-connector'
 
 import { FortmaticConnector } from './Fortmatic'
+import { HmyWalletConnector } from './HarmonyWallet'
 import { NetworkConnector } from './NetworkConnector'
 
 import { Blockchain, Currency } from '@venomswap/sdk'
@@ -51,6 +52,10 @@ switch (BLOCKCHAIN) {
 }
 
 export const injected = new InjectedConnector({
+  supportedChainIds: supportedChainIds
+})
+
+export const hmywallet = new HmyWalletConnector({
   supportedChainIds: supportedChainIds
 })
 
