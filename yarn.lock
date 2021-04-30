@@ -1818,7 +1818,7 @@
     "@harmony-js/transaction" "0.1.56"
     "@harmony-js/utils" "0.1.56"
 
-"@harmony-js/crypto@0.1.56", "@harmony-js/crypto@^0.1.57":
+"@harmony-js/crypto@0.1.56", "@harmony-js/crypto@^0.1.56":
   version "0.1.56"
   resolved "https://registry.yarnpkg.com/@harmony-js/crypto/-/crypto-0.1.56.tgz#62bdd850de8b98df6049bd2c43e096113852287d"
   integrity sha512-JMOWte8d3HXO2b038MqQpZ6al6OHsB9aZTretuzijxwrOIOdPKu9sDNHhmyJhQTIOKqG2+gErlj9AclZbXGk5g==
@@ -2614,11 +2614,6 @@
     "@svgr/plugin-jsx" "^5.5.0"
     "@svgr/plugin-svgo" "^5.5.0"
     loader-utils "^2.0.0"
-
-"@swoop-exchange/utils@=1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@swoop-exchange/utils/-/utils-1.0.3.tgz#645efcabf5af320709cf2682bddf34a3ce42f7dd"
-  integrity sha512-s9wiLve8+drlDKrDhk9T8H35EKQ9XI5LX4YXzLdeaTcavq2jMR7kWbnkTF/setnWAOrva4WG+SUTHX/e0hIdQQ==
 
 "@testing-library/dom@^7.11.0":
   version "7.30.4"
