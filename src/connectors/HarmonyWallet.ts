@@ -23,8 +23,13 @@ class HmyWalletProvider {
     this.ext.contracts.wallet = this.hmy.wallet
   }
 
+  public async send_eth(payload: any): Promise<any> {
+    if (payload?.method) return await this.ext.messenger.send(payload.method, payload.params, 'eth', 0)
+    return await this.ext.messenger.send(payload, [], 'eth', 0)
+  }
+
   public async send(payload: any, callback?: any): Promise<any> {
-    if ('method' in payload && payload.method === 'eth_sendTransaction') {
+    if (payload?.method && payload.method === 'eth_sendTransaction') {
       const txn = this.ext.transactions.newTx({
         from: new HarmonyAddress(payload.params[0].from).bech32,
         to: new HarmonyAddress(payload.params[0].to).bech32,
@@ -71,7 +76,6 @@ export class HmyWalletConnector extends AbstractConnector {
         this.provider = new HmyWalletProvider(this.ext)
         return {
           provider: this.provider,
-          chainId: parseInt((await this.provider.hmy.messenger.send('eth_chainId', [], 'eth', 0)).result),
           account: this.account
         }
       }
@@ -84,7 +88,7 @@ export class HmyWalletConnector extends AbstractConnector {
   }
 
   public async getChainId(): Promise<number | string> {
-    return this.provider ? parseInt((await this.provider.send('eth_chainId')).result) : -1
+    return this.provider ? parseInt((await this.provider.send_eth('eth_chainId')).result) : -1
   }
 
   public async getAccount(): Promise<null | string> {
