@@ -29,7 +29,7 @@ class HmyWalletProvider {
   }
 
   public async send(payload: any, callback?: any): Promise<any> {
-    if (payload?.method && payload.method === 'eth_sendTransaction') {
+    if (payload?.method === 'eth_sendTransaction') {
       const txn = this.ext.transactions.newTx({
         from: new HarmonyAddress(payload.params[0].from).bech32,
         to: new HarmonyAddress(payload.params[0].to).bech32,

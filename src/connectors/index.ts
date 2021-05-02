@@ -56,7 +56,7 @@ export const injected = new InjectedConnector({
 })
 
 export const hmywallet = new HmyWalletConnector({
-  supportedChainIds: supportedChainIds
+  supportedChainIds: [1666600000, 1666700000]
 })
 
 // mainnet only
