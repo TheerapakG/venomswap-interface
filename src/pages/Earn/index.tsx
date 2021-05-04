@@ -166,8 +166,6 @@ export default function Earn() {
             <b>{emissionsPerMinute?.toSignificant(4, { groupSeparator: ',' })}</b> {govToken?.symbol} will be minted
             every minute given the current emission schedule.
             <br />
-            The base emission rate gets significantly reduced every week.
-            <br />
             <br />
             <TYPE.small style={{ textAlign: 'center' }} fontSize={10}>
               * = The APR is calculated using a very simplified formula, it might not fully represent the exact APR

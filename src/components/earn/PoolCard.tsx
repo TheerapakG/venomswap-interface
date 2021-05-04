@@ -106,6 +106,8 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
     stakingInfo.valueOfTotalStakedAmountInPairCurrency &&
     USDPrice?.quote(stakingInfo.valueOfTotalStakedAmountInPairCurrency)
 
+  const enableAPR = true
+
   return (
     <Wrapper showBackground={isStaking} bgColor={backgroundColor}>
       <CardBGImage desaturate />
@@ -125,16 +127,18 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
       </TopSection>
 
       <StatContainer>
-        <RowBetween>
-          <TYPE.white> APR*</TYPE.white>
-          <TYPE.white fontWeight={500}>
-            <b>
-              {stakingInfo.apr && stakingInfo.apr.greaterThan('0')
-                ? `${stakingInfo.apr.multiply('100').toSignificant(4, { groupSeparator: ',' })}%`
-                : 'To be determined'}
-            </b>
-          </TYPE.white>
-        </RowBetween>
+        {enableAPR && (
+          <RowBetween>
+            <TYPE.white> APR*</TYPE.white>
+            <TYPE.white fontWeight={500}>
+              <b>
+                {stakingInfo.apr && stakingInfo.apr.greaterThan('0')
+                  ? `${stakingInfo.apr.multiply('100').toSignificant(4, { groupSeparator: ',' })}%`
+                  : 'To be determined'}
+              </b>
+            </TYPE.white>
+          </RowBetween>
+        )}
         <RowBetween>
           <TYPE.white> Total deposited </TYPE.white>
           <TYPE.white fontWeight={500}>
