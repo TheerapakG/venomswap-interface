@@ -3,8 +3,6 @@ import { TokenAmount } from '@venomswap/sdk'
 import { AutoColumn } from '../../components/Column'
 import styled from 'styled-components'
 
-//import { JSBI } from '@venomswap/sdk'
-//import { JSBI, TokenAmount, ETHER } from '@venomswap/sdk'
 import { RouteComponentProps } from 'react-router-dom'
 import { useWalletModalToggle } from '../../state/application/hooks'
 import { TYPE } from '../../theme'
@@ -17,8 +15,6 @@ import ModifiedUnstakingModal from '../../components/Pit/ModifiedUnstakingModal'
 import ClaimModal from '../../components/Pit/ClaimModal'
 import { useTokenBalance } from '../../state/wallet/hooks'
 import { useActiveWeb3React } from '../../hooks'
-import useBUSDPrice from '../../hooks/useBUSDPrice'
-//import { useColor } from '../../hooks/useColor'
 import { CountUp } from 'use-count-up'
 
 import { BlueCard } from '../../components/Card'
@@ -29,6 +25,10 @@ import { PIT, PIT_SETTINGS } from '../../constants'
 import { GOVERNANCE_TOKEN_INTERFACE } from '../../constants/abis/governanceToken'
 import { PIT_INTERFACE } from '../../constants/abis/pit'
 import useGovernanceToken from 'hooks/useGovernanceToken'
+import useTotalCombinedTVL from '../../hooks/useTotalCombinedTVL'
+import { useStakingInfo } from '../../state/stake/hooks'
+import filterStakingInfos from '../../utils/filterStakingInfos'
+import CombinedTVL from '../../components/CombinedTVL'
 
 const PageWrapper = styled(AutoColumn)`
   max-width: 640px;
@@ -114,8 +114,10 @@ export default function Pit({
 }: RouteComponentProps<{ currencyIdA: string; currencyIdB: string }>) {
   const { account, chainId } = useActiveWeb3React()
 
+  const filteredStakingInfos = filterStakingInfos(useStakingInfo())
+  const TVLs = useTotalCombinedTVL(filteredStakingInfos)
+
   const govToken = useGovernanceToken()
-  const govTokenBusdPrice = useBUSDPrice(govToken)
   const govTokenBalance: TokenAmount | undefined = useTokenBalance(
     account ?? undefined,
     govToken,
@@ -125,13 +127,7 @@ export default function Pit({
 
   const pit = chainId ? PIT[chainId] : undefined
   const pitSettings = chainId ? PIT_SETTINGS[chainId] : undefined
-  const pitGovTokenBalance: TokenAmount | undefined = useTokenBalance(
-    pit && pit.address,
-    govToken,
-    'balanceOf',
-    GOVERNANCE_TOKEN_INTERFACE
-  )
-  const pitTVL = govTokenBusdPrice ? pitGovTokenBalance?.multiply(govTokenBusdPrice?.raw) : undefined
+  const pitTVL = TVLs.totalPitTVL
   const pitBalance: TokenAmount | undefined = useTokenBalance(account ?? undefined, pit, 'balanceOf', PIT_INTERFACE)
 
   const userLiquidityStaked = pitBalance
@@ -184,7 +180,7 @@ export default function Pit({
                 <span role="img" aria-label="wizard-icon" style={{ marginRight: '0.5rem' }}>
                   🏆
                 </span>
-                TVL: ${pitTVL.toSignificant(8, { groupSeparator: ',' })}
+                <CombinedTVL />
               </TYPE.black>
             )}
           </NonCenteredDataRow>

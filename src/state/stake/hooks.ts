@@ -10,10 +10,12 @@ import { abi as IUniswapV2PairABI } from '@venomswap/core/build/IUniswapV2Pair.j
 import { Interface } from '@ethersproject/abi'
 import useGovernanceToken from '../../hooks/useGovernanceToken'
 import useTokensWithWethPrices from '../../hooks/useTokensWithWethPrices'
+import useBUSDPrice from '../../hooks/useBUSDPrice'
 import getBlocksPerYear from '../../utils/getBlocksPerYear'
 import calculateWethAdjustedTotalStakedAmount from '../../utils/calculateWethAdjustedTotalStakedAmount'
 import calculateApr from '../../utils/calculateApr'
 import validStakingInfo from '../../utils/validStakingInfo'
+import determineBaseToken from '../../utils/determineBaseToken'
 
 const PAIR_INTERFACE = new Interface(IUniswapV2PairABI)
 
@@ -25,6 +27,8 @@ export interface StakingInfo {
   pid: number
   // the tokens involved in this pair
   tokens: [Token, Token]
+  // baseToken used for TVL & APR calculations
+  baseToken: Token | undefined
   // the allocation point for the given pool
   allocPoint: JSBI
   // start block for all the rewards pools
@@ -55,8 +59,10 @@ export interface StakingInfo {
   lockedEarnedAmount: TokenAmount
   // the amount of reward token earned by the active account, or undefined if no account - which will be unlocked
   unlockedEarnedAmount: TokenAmount
-  // value of total staked amount, measured in weth (or wone/wbnb)
-  valueOfTotalStakedAmountInPairCurrency: TokenAmount | undefined
+  // value of total staked amount, measured in weth
+  valueOfTotalStakedAmountInWeth: TokenAmount | Fraction | undefined
+  // value of total staked amount, measured in a USD stable coin (busd, usdt, usdc or a mix thereof)
+  valueOfTotalStakedAmountInUsd: Fraction | undefined
   // pool APR
   apr: Fraction | undefined
   // if pool is active
@@ -86,6 +92,7 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
   const tokensWithPrices = useTokensWithWethPrices()
 
   const weth = tokensWithPrices?.WETH?.token
+  const wethBusdPrice = useBUSDPrice(weth)
   const govToken = tokensWithPrices?.govToken?.token
   const govTokenWETHPrice = tokensWithPrices?.govToken?.price
 
@@ -216,8 +223,11 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
         const allocPoint = JSBI.BigInt(poolInfoResult && poolInfoResult[1])
         const active = poolInfoResult && JSBI.GT(JSBI.BigInt(allocPoint), 0) ? true : false
 
-        const adjusted = calculateWethAdjustedTotalStakedAmount(
+        const baseToken = determineBaseToken(tokensWithPrices, tokens)
+
+        const totalStakedAmountWETH = calculateWethAdjustedTotalStakedAmount(
           chainId,
+          baseToken,
           tokensWithPrices,
           tokens,
           totalLpTokenSupply,
@@ -225,8 +235,8 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
           lpTokenReserve?.result
         )
 
-        const totalStakedAmountPairCurrency: TokenAmount | undefined = adjusted?.totalStakedAmountPairCurrency
-        const totalStakedAmountWETH: TokenAmount | Fraction | undefined = adjusted?.totalStakedAmountWETH
+        const totalStakedAmountBUSD =
+          wethBusdPrice && totalStakedAmountWETH && totalStakedAmountWETH.multiply(wethBusdPrice?.raw)
 
         const apr = totalStakedAmountWETH
           ? calculateApr(govTokenWETHPrice, baseBlockRewards, blocksPerYear, poolShare, totalStakedAmountWETH)
@@ -236,6 +246,7 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
           pid: pid,
           allocPoint: allocPoint,
           tokens: tokens,
+          baseToken: baseToken,
           startBlock: startsAtBlock,
           baseRewardsPerBlock: baseBlockRewards,
           poolRewardsPerBlock: poolBlockRewards,
@@ -250,7 +261,8 @@ export function useStakingInfo(pairToFilterBy?: Pair | null): StakingInfo[] {
           earnedAmount: totalPendingRewardAmount,
           lockedEarnedAmount: totalPendingLockedRewardAmount,
           unlockedEarnedAmount: totalPendingUnlockedRewardAmount,
-          valueOfTotalStakedAmountInPairCurrency: totalStakedAmountPairCurrency,
+          valueOfTotalStakedAmountInWeth: totalStakedAmountWETH,
+          valueOfTotalStakedAmountInUsd: totalStakedAmountBUSD,
           apr: apr,
           active: active
         }

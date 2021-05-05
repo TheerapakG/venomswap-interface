@@ -1,45 +1,41 @@
 import { Token, DEFAULT_CURRENCIES } from '@venomswap/sdk'
 import { unwrappedToken } from './wrappedCurrency'
 
-export default function determineBaseToken(
-  tokens: Record<string, any>,
-  token0: Token,
-  token1: Token
-): Token | undefined {
-  const currency0 = unwrappedToken(token0)
-  const currency1 = unwrappedToken(token1)
+export default function determineBaseToken(tokenData: Record<string, any>, tokens: [Token, Token]): Token | undefined {
+  const currency0 = unwrappedToken(tokens[0])
+  const currency1 = unwrappedToken(tokens[1])
 
   //const baseToken = currency0 && DEFAULT_CURRENCIES.includes(currency0) ? token0 : token1
 
-  let baseToken: Token | undefined = tokens?.WETH?.token
+  let baseToken: Token | undefined = tokenData?.WETH?.token
 
   if (DEFAULT_CURRENCIES.includes(currency0) || DEFAULT_CURRENCIES.includes(currency1)) {
-    baseToken = tokens?.WETH?.token
+    baseToken = tokenData?.WETH?.token
   } else if (
-    token0.symbol?.toUpperCase() === tokens?.govToken?.token?.symbol?.toUpperCase() ||
-    token1.symbol?.toUpperCase() === tokens?.govToken?.token?.symbol?.toUpperCase()
+    tokens[0]?.symbol?.toUpperCase() === tokenData?.govToken?.token?.symbol?.toUpperCase() ||
+    tokens[1]?.symbol?.toUpperCase() === tokenData?.govToken?.token?.symbol?.toUpperCase()
   ) {
-    baseToken = tokens?.govToken?.token
+    baseToken = tokenData?.govToken?.token
   } else if (
-    token0.symbol?.toUpperCase() === tokens?.BUSD?.token?.symbol?.toUpperCase() ||
-    token1.symbol?.toUpperCase() === tokens?.BUSD?.token?.symbol?.toUpperCase()
+    tokens[0]?.symbol?.toUpperCase() === tokenData?.BUSD?.token?.symbol?.toUpperCase() ||
+    tokens[1]?.symbol?.toUpperCase() === tokenData?.BUSD?.token?.symbol?.toUpperCase()
   ) {
-    baseToken = tokens?.BUSD?.token
+    baseToken = tokenData?.BUSD?.token
   } else if (
-    token0.symbol?.toUpperCase() === tokens?.USDC?.token?.symbol?.toUpperCase() ||
-    token1.symbol?.toUpperCase() === tokens?.USDC?.token?.symbol?.toUpperCase()
+    tokens[0]?.symbol?.toUpperCase() === tokenData?.USDC?.token?.symbol?.toUpperCase() ||
+    tokens[1]?.symbol?.toUpperCase() === tokenData?.USDC?.token?.symbol?.toUpperCase()
   ) {
-    baseToken = tokens?.USDC?.token
+    baseToken = tokenData?.USDC?.token
   } else if (
-    token0.symbol?.toUpperCase() === tokens?.bscBUSD?.token?.symbol?.toUpperCase() ||
-    token1.symbol?.toUpperCase() === tokens?.bscBUSD?.token?.symbol?.toUpperCase()
+    tokens[0]?.symbol?.toUpperCase() === tokenData?.bscBUSD?.token?.symbol?.toUpperCase() ||
+    tokens[1]?.symbol?.toUpperCase() === tokenData?.bscBUSD?.token?.symbol?.toUpperCase()
   ) {
-    baseToken = tokens?.bscBUSD?.token
+    baseToken = tokenData?.bscBUSD?.token
   } else if (
-    token0.symbol?.toUpperCase() === tokens?.bridgedETH?.token?.symbol?.toUpperCase() ||
-    token1.symbol?.toUpperCase() === tokens?.bridgedETH?.token?.symbol?.toUpperCase()
+    tokens[0]?.symbol?.toUpperCase() === tokenData?.bridgedETH?.token?.symbol?.toUpperCase() ||
+    tokens[1]?.symbol?.toUpperCase() === tokenData?.bridgedETH?.token?.symbol?.toUpperCase()
   ) {
-    baseToken = tokens?.bridgedETH?.token
+    baseToken = tokenData?.bridgedETH?.token
   }
 
   return baseToken

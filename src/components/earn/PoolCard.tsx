@@ -14,7 +14,6 @@ import { unwrappedToken } from '../../utils/wrappedCurrency'
 import useBUSDPrice from '../../hooks/useBUSDPrice'
 //import useUSDCPrice from '../../utils/useUSDCPrice'
 //import { BIG_INT_SECONDS_IN_WEEK } from '../../constants'
-import { DEFAULT_CURRENCIES } from '@venomswap/sdk'
 import useGovernanceToken from '../../hooks/useGovernanceToken'
 
 const StatContainer = styled.div`
@@ -81,32 +80,18 @@ const BottomSection = styled.div<{ showBackground: boolean }>`
 `
 
 export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) {
-  const token0 = stakingInfo.tokens[0]
-  const token1 = stakingInfo.tokens[1]
-
-  const currency0 = unwrappedToken(token0)
-  const currency1 = unwrappedToken(token1)
-
-  const isStaking = Boolean(stakingInfo.stakedAmount.greaterThan('0'))
-
   const govToken = useGovernanceToken()
   const govTokenPrice = useBUSDPrice(govToken)
 
+  const isStaking = Boolean(stakingInfo.stakedAmount.greaterThan('0'))
   const poolSharePercentage = stakingInfo.poolShare.multiply(JSBI.BigInt(100))
 
   // get the color of the token
-  const baseToken = currency0 && DEFAULT_CURRENCIES.includes(currency0) ? token0 : token1
-  const token = currency0 && DEFAULT_CURRENCIES.includes(currency0) ? token1 : token0
-  const backgroundColor = useColor(token)
-
-  // get the USD value of the staked base token
-  const USDPrice = useBUSDPrice(baseToken)
-  const valueOfTotalStakedAmountInBUSD =
-    stakingInfo &&
-    stakingInfo.valueOfTotalStakedAmountInPairCurrency &&
-    USDPrice?.quote(stakingInfo.valueOfTotalStakedAmountInPairCurrency)
-
-  const enableAPR = true
+  const token0 = stakingInfo.tokens[0]
+  const token1 = stakingInfo.tokens[1]
+  const currency0 = unwrappedToken(token0)
+  const currency1 = unwrappedToken(token1)
+  const backgroundColor = useColor(stakingInfo.baseToken)
 
   return (
     <Wrapper showBackground={isStaking} bgColor={backgroundColor}>
@@ -127,28 +112,23 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
       </TopSection>
 
       <StatContainer>
-        {enableAPR && (
-          <RowBetween>
-            <TYPE.white> APR*</TYPE.white>
-            <TYPE.white fontWeight={500}>
-              <b>
-                {stakingInfo.apr && stakingInfo.apr.greaterThan('0')
-                  ? `${stakingInfo.apr.multiply('100').toSignificant(4, { groupSeparator: ',' })}%`
-                  : 'To be determined'}
-              </b>
-            </TYPE.white>
-          </RowBetween>
-        )}
+        <RowBetween>
+          <TYPE.white> APR*</TYPE.white>
+          <TYPE.white fontWeight={500}>
+            <b>
+              {stakingInfo.apr && stakingInfo.apr.greaterThan('0')
+                ? `${stakingInfo.apr.multiply('100').toSignificant(4, { groupSeparator: ',' })}%`
+                : 'To be determined'}
+            </b>
+          </TYPE.white>
+        </RowBetween>
         <RowBetween>
           <TYPE.white> Total deposited </TYPE.white>
           <TYPE.white fontWeight={500}>
             <b>
-              {stakingInfo && stakingInfo.valueOfTotalStakedAmountInPairCurrency && valueOfTotalStakedAmountInBUSD
-                ? `$${valueOfTotalStakedAmountInBUSD.toFixed(0, { groupSeparator: ',' })}`
-                : stakingInfo && stakingInfo.valueOfTotalStakedAmountInPairCurrency
-                ? `${stakingInfo.valueOfTotalStakedAmountInPairCurrency?.toSignificant(4, { groupSeparator: ',' }) ??
-                    '-'} ONE`
-                : '$0'}
+              {stakingInfo && stakingInfo.valueOfTotalStakedAmountInUsd
+                ? `$${stakingInfo.valueOfTotalStakedAmountInUsd.toFixed(0, { groupSeparator: ',' })}`
+                : '-'}
             </b>
           </TYPE.white>
         </RowBetween>

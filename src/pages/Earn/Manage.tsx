@@ -3,8 +3,7 @@ import { AutoColumn } from '../../components/Column'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 
-import { JSBI, DEFAULT_CURRENCIES } from '@venomswap/sdk'
-//import { JSBI, TokenAmount, ETHER } from '@venomswap/sdk'
+import { JSBI } from '@venomswap/sdk'
 import { RouteComponentProps } from 'react-router-dom'
 import DoubleCurrencyLogo from '../../components/DoubleLogo'
 import { useCurrency } from '../../hooks/Tokens'
@@ -26,14 +25,10 @@ import { CountUp } from 'use-count-up'
 
 import { wrappedCurrency } from '../../utils/wrappedCurrency'
 import { currencyId } from '../../utils/currencyId'
-//import { useTotalSupply } from '../../data/TotalSupply'
 import { usePair } from '../../data/Reserves'
 import usePrevious from '../../hooks/usePrevious'
-//import useUSDCPrice from '../../utils/useUSDCPrice'
 import { BIG_INT_ZERO } from '../../constants'
-//import { BIG_INT_ZERO, BIG_INT_SECONDS_IN_WEEK } from '../../constants'
 import useGovernanceToken from '../../hooks/useGovernanceToken'
-import useBUSDPrice from '../../hooks/useBUSDPrice'
 
 const PageWrapper = styled(AutoColumn)`
   max-width: 640px;
@@ -98,7 +93,6 @@ export default function Manage({
   }
 }: RouteComponentProps<{ currencyIdA: string; currencyIdB: string }>) {
   const { account, chainId } = useActiveWeb3React()
-
   const govToken = useGovernanceToken()
 
   // get currencies and pair
@@ -136,16 +130,7 @@ export default function Manage({
   // fade cards if nothing staked or nothing earned yet
   const disableTop = !stakingInfo?.stakedAmount || stakingInfo.stakedAmount.equalTo(JSBI.BigInt(0))
 
-  const baseToken = currencyA && DEFAULT_CURRENCIES.includes(currencyA) ? tokenA : tokenB
-  const token = currencyA && DEFAULT_CURRENCIES.includes(currencyA) ? tokenB : tokenA
-  const backgroundColor = useColor(token)
-
-  // get the USD value of the staked base token
-  const USDPrice = useBUSDPrice(baseToken)
-  const valueOfTotalStakedAmountInBUSD =
-    stakingInfo &&
-    stakingInfo.valueOfTotalStakedAmountInPairCurrency &&
-    USDPrice?.quote(stakingInfo.valueOfTotalStakedAmountInPairCurrency)
+  const backgroundColor = useColor(stakingInfo.baseToken)
 
   const countUpAmount = stakingInfo?.earnedAmount?.toFixed(6) ?? '0'
   const countUpAmountPrevious = usePrevious(countUpAmount) ?? '0'
@@ -174,12 +159,9 @@ export default function Manage({
           <AutoColumn gap="sm">
             <TYPE.body style={{ margin: 0 }}>Total Deposits</TYPE.body>
             <TYPE.body fontSize={24} fontWeight={500}>
-              {stakingInfo && stakingInfo.valueOfTotalStakedAmountInPairCurrency && valueOfTotalStakedAmountInBUSD
-                ? `$${valueOfTotalStakedAmountInBUSD.toFixed(0, { groupSeparator: ',' })}`
-                : stakingInfo && stakingInfo.valueOfTotalStakedAmountInPairCurrency
-                ? `${stakingInfo.valueOfTotalStakedAmountInPairCurrency?.toSignificant(4, { groupSeparator: ',' }) ??
-                    '-'} ONE`
-                : '$0'}
+              {stakingInfo && stakingInfo.valueOfTotalStakedAmountInUsd
+                ? `$${stakingInfo.valueOfTotalStakedAmountInUsd.toFixed(0, { groupSeparator: ',' })}`
+                : '-'}
             </TYPE.body>
           </AutoColumn>
         </PoolData>

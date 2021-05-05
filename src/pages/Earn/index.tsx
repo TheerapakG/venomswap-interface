@@ -1,5 +1,5 @@
 import React from 'react'
-import { WETH, JSBI } from '@venomswap/sdk'
+import { JSBI } from '@venomswap/sdk'
 import { BLOCKCHAIN_SETTINGS } from '@venomswap/sdk-extra'
 import { AutoColumn } from '../../components/Column'
 import styled from 'styled-components'
@@ -15,10 +15,11 @@ import { CardSection, ExtraDataCard, CardNoise, CardBGImage } from '../../compon
 import Loader from '../../components/Loader'
 import { useActiveWeb3React } from '../../hooks'
 import useGovernanceToken from '../../hooks/useGovernanceToken'
-import useBUSDPrice from '../../hooks/useBUSDPrice'
-import useTotalTVL from '../../hooks/useTotalTVL'
+import useTotalCombinedTVL from '../../hooks/useTotalCombinedTVL'
 import useBaseStakingRewardsEmission from '../../hooks/useBaseStakingRewardsEmission'
 import { OutlineCard } from '../../components/Card'
+import filterStakingInfos from '../../utils/filterStakingInfos'
+import CombinedTVL from '../../components/CombinedTVL'
 
 const PageWrapper = styled(AutoColumn)`
   max-width: 640px;
@@ -60,16 +61,8 @@ flex-direction: column;
 
 export default function Earn() {
   const { chainId, account } = useActiveWeb3React()
-
-  const weth = chainId && WETH[chainId]
   const govToken = useGovernanceToken()
-
-  const wethBusdPrice = useBUSDPrice(weth)
-  const govTokenBusdPrice = useBUSDPrice(govToken)
-
   const blockchainSettings = chainId ? BLOCKCHAIN_SETTINGS[chainId] : undefined
-
-  // staking info for connected account
   const stakingInfos = useStakingInfo()
 
   /**
@@ -85,19 +78,12 @@ export default function Earn() {
   const emissionsPerMinute =
     baseEmissions && blockchainSettings ? baseEmissions.multiply(JSBI.BigInt(blocksPerMinute)) : undefined
 
-  const filteredStakingInfos = stakingInfos
-    .filter(s => s.active)
-    .sort((a, b) => {
-      if (a.apr === undefined || b.apr === undefined) {
-        return 0
-      }
-      return b.apr.greaterThan(a.apr) ? 1 : -1
-    })
+  const filteredStakingInfos = filterStakingInfos(stakingInfos)
 
   // toggle copy if rewards are inactive
   //const stakingRewardsExist = Boolean(typeof chainId === 'number' && (STAKING_REWARDS_INFO[chainId]?.length ?? 0) > 0)
 
-  const totalTVL = useTotalTVL(filteredStakingInfos, weth, wethBusdPrice, govTokenBusdPrice)
+  const TVLs = useTotalCombinedTVL(filteredStakingInfos)
 
   return (
     <PageWrapper gap="lg" justify="center">
@@ -126,12 +112,12 @@ export default function Earn() {
       <AutoColumn gap="lg" style={{ width: '100%', maxWidth: '720px' }}>
         <DataRow style={{ alignItems: 'baseline' }}>
           <TYPE.mediumHeader style={{ marginTop: '0.5rem' }}>Pools</TYPE.mediumHeader>
-          {totalTVL && totalTVL.greaterThan('0') && (
+          {TVLs && TVLs.totalCombinedTVL && TVLs.totalCombinedTVL.greaterThan('0') && (
             <TYPE.black style={{ marginTop: '0.5rem' }}>
               <span role="img" aria-label="wizard-icon" style={{ marginRight: '0.5rem' }}>
                 🏆
               </span>
-              TVL: ${totalTVL.toSignificant(8, { groupSeparator: ',' })}
+              <CombinedTVL />
             </TYPE.black>
           )}
         </DataRow>
