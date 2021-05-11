@@ -7,9 +7,9 @@ class HmyWalletProvider {
   private ext: HarmonyExtension
   public hmy: Harmony
 
-  constructor(ext: HarmonyExtension) {
+  constructor(ext: HarmonyExtension, rpc?: string) {
     this.ext = ext
-    this.hmy = new Harmony(ext.provider.url, {
+    this.hmy = new Harmony(rpc ?? ext.provider.url, {
       chainType: ext.messenger.chainType,
       chainId: 1
     })
@@ -55,14 +55,20 @@ class HmyWalletProvider {
   }
 }
 
+interface HmyWalletConnectorArguments extends AbstractConnectorArguments {
+  rpc?: string
+}
+
 export class HmyWalletConnector extends AbstractConnector {
   private ext?: HarmonyExtension
   private provider?: HmyWalletProvider
+  private rpc?: string
   private account: string | null
   private auth: boolean
 
-  constructor(kwargs: AbstractConnectorArguments) {
+  constructor(kwargs: HmyWalletConnectorArguments) {
     super(kwargs)
+    this.rpc = kwargs.rpc
     this.account = null
     this.auth = false
   }
@@ -73,7 +79,7 @@ export class HmyWalletConnector extends AbstractConnector {
       if (this.ext) {
         this.account = this.ext.crypto.fromBech32(account.address)
         this.auth = true
-        this.provider = new HmyWalletProvider(this.ext)
+        this.provider = new HmyWalletProvider(this.ext, this.rpc)
         return {
           provider: this.provider,
           account: this.account
@@ -96,17 +102,15 @@ export class HmyWalletConnector extends AbstractConnector {
   }
 
   public deactivate() {
-    if (this.ext) {
-      this.ext
-        .logout()
-        .then(() => {
-          this.auth = false
-          return Promise.resolve()
-        })
-        .catch((error: Error) => {
-          console.log(error)
-        })
-    }
+    this.ext
+      ?.logout()
+      .then(() => {
+        this.auth = false
+        return Promise.resolve()
+      })
+      .catch((error: Error) => {
+        console.log(error)
+      })
   }
 
   public async isAuthorized(): Promise<boolean> {
