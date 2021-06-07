@@ -1,4 +1,4 @@
-import { WETH, Token, Blockchain } from '@venomswap/sdk'
+import { ChainId, WETH, Token, Blockchain } from '@venomswap/sdk'
 import { useMemo } from 'react'
 import useGovernanceToken from './useGovernanceToken'
 import useTokenWethPrice from './useTokenWethPrice'
@@ -15,7 +15,8 @@ export default function useTokensWithWethPrices(): Record<string, any> {
   const govToken = useGovernanceToken()
   const govTokenWETHPrice = useTokenWethPrice(govToken)
 
-  const BUSD: Token | undefined = getToken(chainId, 'BUSD')
+  const BUSDTicker = chainId !== ChainId.HARMONY_TESTNET ? 'BUSD' : '1BUSD'
+  const BUSD: Token | undefined = getToken(chainId, BUSDTicker)
   const BUSDWETHPrice = useTokenWethPrice(BUSD)
 
   const USDCTicker = blockchain === Blockchain.HARMONY ? '1USDC' : 'USDC'

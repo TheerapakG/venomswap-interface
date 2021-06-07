@@ -18,7 +18,7 @@ export const ROUTER_ADDRESSES: { [chainId in ChainId]: string } = {
   [ChainId.BSC_MAINNET]: ZERO_ONE_ADDRESS,
   [ChainId.BSC_TESTNET]: '0xDBbEbd367133609DA8c7AcDF96A4498E4F0f1F9c',
   [ChainId.HARMONY_MAINNET]: '0xf012702a5f0e54015362cBCA26a26fc90AA832a3',
-  [ChainId.HARMONY_TESTNET]: '0x60fBda25dED0f518cE14061B1f6fA143BAb3a2dc'
+  [ChainId.HARMONY_TESTNET]: '0x8e9A3cE409B13ef459fE4448aE97a79d6Ecd8b4b'
 }
 
 export const GOVERNANCE_ADDRESS = '0x5e4be8Bc9637f0EAA1A755019e06A68ce081D58F'
@@ -48,7 +48,7 @@ export const GOVERNANCE_TOKEN: { [chainId in ChainId]: Token } = {
   ),
   [ChainId.HARMONY_TESTNET]: new Token(
     ChainId.HARMONY_TESTNET,
-    '0x5126cE855c03cC6e12A8Ff36Ef4BaB061ACF152e',
+    '0x69A655c56087D927eb05247FB56495a0f19B9f70',
     18,
     'VIPER',
     'Viper'
@@ -64,7 +64,7 @@ export const MASTER_BREEDER: { [chainId in ChainId]: string } = {
   [ChainId.BSC_MAINNET]: ZERO_ONE_ADDRESS,
   [ChainId.BSC_TESTNET]: '0x8E7Cfa9685935fd87562E5749eFCAF64Eef61DD6',
   [ChainId.HARMONY_MAINNET]: '0x7AbC67c8D4b248A38B0dc5756300630108Cb48b4',
-  [ChainId.HARMONY_TESTNET]: '0x01A898266bCb86D0DB8AA56da9bD9259AC12Fe4F'
+  [ChainId.HARMONY_TESTNET]: '0x651e2E555164834bc42303c1a1B4f795a9Fb7619'
 }
 
 export const PIT_BREEDER: { [chainId in ChainId]: string } = {
@@ -76,7 +76,7 @@ export const PIT_BREEDER: { [chainId in ChainId]: string } = {
   [ChainId.BSC_MAINNET]: ZERO_ONE_ADDRESS,
   [ChainId.BSC_TESTNET]: '0x38a75B033c2C3444Cb91D580645F76d042F98EdA',
   [ChainId.HARMONY_MAINNET]: '0x08913d353091e24B361f0E519e2f7aD07a78995d',
-  [ChainId.HARMONY_TESTNET]: '0x2A1Ee92694Cf18Fc5a5bFF1DB194Fc7330A2Ce01'
+  [ChainId.HARMONY_TESTNET]: '0x3945509547b74370468238F715e2dcf698a088B4'
 }
 
 export const PIT: { [chainId in ChainId]: Token } = {
@@ -102,7 +102,7 @@ export const PIT: { [chainId in ChainId]: Token } = {
   ),
   [ChainId.HARMONY_TESTNET]: new Token(
     ChainId.HARMONY_TESTNET,
-    '0x8Aa4091C4B1149127caAf6Cc77210F103c2c697c',
+    '0x1e11CA9830Cd3a9867990CE2769EDf77F21ae5FA',
     18,
     'xVIPER',
     'ViperPit'
@@ -205,13 +205,27 @@ export const CUSTOM_BASES: { [chainId in ChainId]?: { [tokenAddress: string]: To
 // used for display in the default list when adding liquidity
 export const SUGGESTED_BASES: ChainTokenList = {
   ...WETH_ONLY,
-  [ChainId.MAINNET]: [...WETH_ONLY[ChainId.MAINNET], DAI, USDC, USDT, WBTC]
+  [ChainId.MAINNET]: [...WETH_ONLY[ChainId.MAINNET], DAI, USDC, USDT, WBTC],
+  [ChainId.HARMONY_MAINNET]: [
+    ...WETH_ONLY[ChainId.HARMONY_MAINNET],
+    getTokenWithDefault(ChainId.HARMONY_MAINNET, 'BUSD'),
+    getTokenWithDefault(ChainId.HARMONY_MAINNET, 'VIPER')
+  ]
 }
 
 // used to construct the list of all pairs we consider by default in the frontend
 export const BASES_TO_TRACK_LIQUIDITY_FOR: ChainTokenList = {
   ...WETH_ONLY,
-  [ChainId.MAINNET]: [...WETH_ONLY[ChainId.MAINNET], DAI, USDC, USDT, WBTC]
+  [ChainId.MAINNET]: [...WETH_ONLY[ChainId.MAINNET], DAI, USDC, USDT, WBTC],
+  [ChainId.HARMONY_MAINNET]: [
+    ...WETH_ONLY[ChainId.HARMONY_MAINNET],
+    getTokenWithDefault(ChainId.HARMONY_MAINNET, 'BUSD'),
+    getTokenWithDefault(ChainId.HARMONY_MAINNET, 'bscBUSD'),
+    getTokenWithDefault(ChainId.HARMONY_MAINNET, '1USDC'),
+    getTokenWithDefault(ChainId.HARMONY_MAINNET, 'VIPER'),
+    getTokenWithDefault(ChainId.HARMONY_MAINNET, '1ETH'),
+    getTokenWithDefault(ChainId.HARMONY_MAINNET, 'LINK')
+  ]
 }
 
 export const PINNED_PAIRS: { readonly [chainId in ChainId]?: [Token, Token][] } = {

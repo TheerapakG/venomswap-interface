@@ -26,8 +26,9 @@ import { GOVERNANCE_TOKEN_INTERFACE } from '../../constants/abis/governanceToken
 import { PIT_INTERFACE } from '../../constants/abis/pit'
 import useGovernanceToken from 'hooks/useGovernanceToken'
 import useTotalCombinedTVL from '../../hooks/useTotalCombinedTVL'
+import usePitRatio from '../../hooks/usePitRatio'
 import { useStakingInfo } from '../../state/stake/hooks'
-import filterStakingInfos from '../../utils/filterStakingInfos'
+import useFilterStakingInfos from '../../hooks/useFilterStakingInfos'
 import CombinedTVL from '../../components/CombinedTVL'
 
 const PageWrapper = styled(AutoColumn)`
@@ -114,7 +115,8 @@ export default function Pit({
 }: RouteComponentProps<{ currencyIdA: string; currencyIdB: string }>) {
   const { account, chainId } = useActiveWeb3React()
 
-  const filteredStakingInfos = filterStakingInfos(useStakingInfo())
+  const isActive = true
+  const filteredStakingInfos = useFilterStakingInfos(useStakingInfo(isActive), isActive)
   const TVLs = useTotalCombinedTVL(filteredStakingInfos)
 
   const govToken = useGovernanceToken()
@@ -127,8 +129,9 @@ export default function Pit({
 
   const pit = chainId ? PIT[chainId] : undefined
   const pitSettings = chainId ? PIT_SETTINGS[chainId] : undefined
-  const pitTVL = TVLs.totalPitTVL
   const pitBalance: TokenAmount | undefined = useTokenBalance(account ?? undefined, pit, 'balanceOf', PIT_INTERFACE)
+  const govTokenPitTokenRatio = usePitRatio()
+  const adjustedPitBalance = govTokenPitTokenRatio ? pitBalance?.multiply(govTokenPitTokenRatio) : undefined
 
   const userLiquidityStaked = pitBalance
   const userLiquidityUnstaked = govTokenBalance
@@ -175,7 +178,7 @@ export default function Pit({
         <AutoColumn gap="lg" style={{ width: '100%', maxWidth: '720px' }}>
           <NonCenteredDataRow style={{ alignItems: 'baseline' }}>
             <TYPE.mediumHeader></TYPE.mediumHeader>
-            {pitTVL && pitTVL.greaterThan('0') && (
+            {TVLs?.stakingPoolTVL?.greaterThan('0') && (
               <TYPE.black>
                 <span role="img" aria-label="wizard-icon" style={{ marginRight: '0.5rem' }}>
                   🏆
@@ -210,7 +213,14 @@ export default function Pit({
             <AutoColumn gap="sm">
               <RowBetween>
                 <div>
-                  <TYPE.black>Your x{govToken?.symbol} Balance</TYPE.black>
+                  <TYPE.black>
+                    Your x{govToken?.symbol} Balance
+                    {govTokenPitTokenRatio && (
+                      <TYPE.italic display="inline" marginLeft="0.25em">
+                        (1 x{govToken?.symbol} = {govTokenPitTokenRatio.toSignificant(4)} {govToken?.symbol})
+                      </TYPE.italic>
+                    )}
+                  </TYPE.black>
                 </div>
               </RowBetween>
               <RowBetween style={{ alignItems: 'baseline' }}>
@@ -230,10 +240,17 @@ export default function Pit({
           </StyledBottomCard>
         </BottomSection>
 
-        {account && (
+        {account && adjustedPitBalance && adjustedPitBalance?.greaterThan('0') && (
+          <TYPE.main>
+            You have {adjustedPitBalance?.toFixed(2, { groupSeparator: ',' })} {govToken?.symbol} tokens staked in
+            the&nbsp;{pitSettings?.name}.
+          </TYPE.main>
+        )}
+
+        {account && (!adjustedPitBalance || adjustedPitBalance?.equalTo('0')) && (
           <TYPE.main>
             You have {govTokenBalance?.toFixed(2, { groupSeparator: ',' })} {govToken?.symbol} tokens available to
-            deposit to the {pitSettings?.name}
+            deposit to the {pitSettings?.name}.
           </TYPE.main>
         )}
 

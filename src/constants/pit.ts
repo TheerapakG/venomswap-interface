@@ -33,18 +33,6 @@ export const PIT_POOLS: {
     {
       pid: 0,
       tokens: getPairTokensWithDefaults(ChainId.HARMONY_TESTNET, 'WONE/BUSD')
-    },
-    {
-      pid: 1,
-      tokens: getPairTokensWithDefaults(ChainId.HARMONY_TESTNET, 'WONE/VIPER')
-    },
-    {
-      pid: 2,
-      tokens: getPairTokensWithDefaults(ChainId.HARMONY_TESTNET, 'WONE/1ETH')
-    },
-    {
-      pid: 3,
-      tokens: getPairTokensWithDefaults(ChainId.HARMONY_TESTNET, 'BUSD/VIPER')
     }
   ],
   [ChainId.BSC_TESTNET]: [
